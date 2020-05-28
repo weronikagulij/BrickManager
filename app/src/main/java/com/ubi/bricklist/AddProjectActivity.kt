@@ -19,7 +19,6 @@ import com.ubi.bricklist.classes.inventory.InventoryPart
 class AddProjectActivity : AppCompatActivity() {
 
     private val tag = "mymsg"
-    private var dataChanged = false;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,36 +26,14 @@ class AddProjectActivity : AppCompatActivity() {
     }
 
     fun addProject(v: View) {
-//        Log.d(tag, xmlInput.text.toString())
-//        Log.d(tag, nameInput.text.toString()) todo
-
-        val xmlParser = XMLparser()
-        val projectList = xmlParser.getProjectListFromUrl(GlobalVariables.xmlUrl + "615.xml")
-        val inventory = Inventory(nameInput.text.toString())
-
-        val id = GlobalVariables.dbHandler.addInventory(inventory)
-
-        for (project in projectList) {
-            val inventoryPart =
-                InventoryPart(
-                    id,
-                    project.itemType,
-                    project.itemId,
-                    project.qty.toInt(),
-                    project.color,
-                    project.extra
-                )
-            GlobalVariables.dbHandler.addInventoryPart(inventoryPart)
-        }
-
-        this.dataChanged = true
+        Log.d(tag, nameInput.text.toString())
+        val xmlParser = XMLparser(this, addMessage, nameInput.text.toString(), xmlInput.text.toString())
+        xmlParser.getProjectListFromUrl()
     }
 
     override fun finish() {
-        if(this.dataChanged) {
-            val data = Intent()
-            setResult(Activity.RESULT_OK, data)
-        }
+        val data = Intent()
+        setResult(Activity.RESULT_OK, data)
 
         super.finish()
     }

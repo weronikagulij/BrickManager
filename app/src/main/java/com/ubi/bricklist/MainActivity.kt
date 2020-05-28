@@ -30,34 +30,17 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-//        val listItems = ArrayList<String>()
-//
-//        listItems.add("Item 1\nLast modified: 22222")
-//        listItems.add("Item 2")
-//
-//        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, listItems)
-//        inventoryList.adapter = adapter
-//
-//        inventoryList.setOnItemClickListener { _, _, arg2, _ ->
-//            Log.d(tag , "Items $arg2")
-//        }
-
         GlobalVariables.dbHandler.connect(this)
-//        Log.d(tag, this.getExternalFilesDir(null).toString())
 
         this.getProjectsFromDb()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)

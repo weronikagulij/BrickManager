@@ -1,17 +1,37 @@
 package com.ubi.bricklist.classes.XMLparser
 
+import android.app.Activity
 import android.util.Log
+import android.widget.TextView
+import com.ubi.bricklist.classes.inventory.Inventory
+import com.ubi.bricklist.classes.inventory.InventoryPart
+import com.ubi.bricklist.utilities.GlobalVariables
+import kotlinx.android.synthetic.main.activity_add_project.*
 import java.net.HttpURLConnection
 import java.net.URL
 
-class XMLparser {
+class XMLparser(
+    private val activity: Activity,
+    private val fieldToUpdate: TextView,
+    private val inventoryName: String,
+    private val projectName: String
+) {
     var response: Boolean = false
     var projectList: MutableList<ProjectXML> = ArrayList()
 
-    constructor() {}
+    private val successMsg = "Success! Go back to see your new project"
+    private val errorMsg = "Error! File not found"
+    private val loadingMsg = "Loading..."
 
-    fun getProjectListFromUrl(url: String): MutableList<ProjectXML> {
-        val url = URL(url)
+    fun getProjectListFromUrl() {
+        val url = URL(GlobalVariables.xmlUrl + projectName + ".xml")
+
+        activity.runOnUiThread {
+            fieldToUpdate.text = loadingMsg
+        }
+
+        Log.d("mymsg",GlobalVariables.xmlUrl + projectName + ".xml")
+
         val thread = Thread(Runnable {
             try {
                 with(url.openConnection() as HttpURLConnection) {
@@ -59,18 +79,37 @@ class XMLparser {
                         }
                     }
                 }
+
+                val inventory = Inventory(inventoryName)
+
+                val id = GlobalVariables.dbHandler.addInventory(inventory)
+
+                for (project in projectList) {
+                    val inventoryPart =
+                        InventoryPart(
+                            id,
+                            project.itemType,
+                            project.itemId,
+                            project.qty.toInt(),
+                            project.color,
+                            project.extra
+                        )
+                    GlobalVariables.dbHandler.addInventoryPart(inventoryPart)
+                }
+                updateMessage(fieldToUpdate, this.successMsg)
             } catch (e: Exception) {
-                e.printStackTrace()
+                updateMessage(fieldToUpdate, this.errorMsg)
             } finally {
                 response = true
             }
         })
 
         thread.start()
-        while(!this.response) {
-            Thread.sleep(10)
-        }
+    }
 
-        return projectList
+    private fun updateMessage(fieldToUpdate: TextView, message: String) {
+        activity.runOnUiThread {
+            fieldToUpdate.text = message
+        }
     }
 }

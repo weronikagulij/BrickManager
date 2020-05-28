@@ -3,7 +3,6 @@ package com.ubi.bricklist
 import android.app.Activity
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,17 +10,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.squareup.picasso.Picasso
-import com.ubi.bricklist.classes.URLTaskManager
+import com.ubi.bricklist.utilities.URLTaskManager
 import com.ubi.bricklist.classes.inventory.InventoryPart
 import com.ubi.bricklist.utilities.GlobalVariables
 import kotlinx.android.synthetic.main.activity_project.*
 import android.graphics.BitmapFactory
-import android.graphics.Bitmap
+import java.lang.Exception
 import java.net.URL
-
-
-
 
 class ProjectActivity : AppCompatActivity() {
 
@@ -34,35 +29,6 @@ class ProjectActivity : AppCompatActivity() {
 
         val inventoriesParts = GlobalVariables.dbHandler.getInventoriesPartsById(GlobalVariables.currentInventory.id)
 
-//        for (part in inventoriesParts) {
-//            Log.d(tag,
-//                part.itemId + " "
-//                        + part.colorId
-//                        +" "
-//                        + part.displayableName
-//                        +" " + part.extra
-//                        +" " + part.inventoryId
-//                        +" " + part.itemId
-//                        +" " + part.quantityInSet
-//                        + " " + part.quantityInStore
-//            )
-//        }
-//        Log.d(tag, GlobalVariables.currentInventory.name)
-
-//        list_recycler_view.apply {
-////            layoutManager = LinearLayoutManager(this@MainActivity)
-//            adapter = MyFirstAdapter()
-//        }
-//        val items = listOf(
-//            MainItem("Михаил", "Лермонтов"),
-//            MainItem("Александр", "Блок"),
-//            MainItem("Николай", "Некрасов"),
-//            MainItem("Фёдор", "Тютчев"),
-//            MainItem("Сергей", "Есенин"),
-//            MainItem("Владимир", "Маяковский")
-//        )
-
-
         val myAdapter = MainAdapter(inventoriesParts, this, object : MainAdapter.Callback {
             override fun onItemClicked(item: InventoryPart) {
                 //TODO Here comes element, that was clicked on. You can continue to work with it.
@@ -70,14 +36,8 @@ class ProjectActivity : AppCompatActivity() {
         })
 
         list_recycler_view.adapter = myAdapter
-
     }
 }
-
-//data class MainItem(
-//    val firstName: String,
-//    val lastName: String
-//)
 
 class MainAdapter(var items: MutableList<InventoryPart>, val activity: Activity, val callback: Callback) : RecyclerView.Adapter<MainAdapter.MainHolder>() {
 
@@ -104,8 +64,6 @@ class MainAdapter(var items: MutableList<InventoryPart>, val activity: Activity,
         private val tag = "mymsg"
 
         fun bind(item: InventoryPart, activity: Activity) {
-//            firstName.text = item.firstName
-//            lastName.text = item.lastName
             name.text = item.displayableName
             currentNumber.text = item.quantityInSet.toString()
             requiredNumber.text = item.quantityInStore.toString()
@@ -124,75 +82,24 @@ class MainAdapter(var items: MutableList<InventoryPart>, val activity: Activity,
                     url = GlobalVariables.bricklinkImgOldUrl + item.itemId + ".jpg"
                 }
 
-//                val urlHttp = URL(url)
-//                val bmp = BitmapFactory.decodeStream(urlHttp.openConnection().getInputStream())
-//                imageView.setImageBitmap(bmp)
+                try {
+                    val urlHttp = URL(url)
+                    val bmp = BitmapFactory.decodeStream(urlHttp.openConnection().getInputStream())
 
-                val urlHttp = URL(url)
-                val bmp = BitmapFactory.decodeStream(urlHttp.openConnection().getInputStream())
+                    activity.runOnUiThread {
+                        imageView.setImageBitmap(bmp)
+                    }
+                } catch (e: Exception) {
+                    val urlHttp = URL(GlobalVariables.defaultLegoImg)
+                    val bmp = BitmapFactory.decodeStream(urlHttp.openConnection().getInputStream())
 
-                activity.runOnUiThread(Runnable {
-                    imageView.setImageBitmap(bmp)
-                })
-
-//                Picasso.get()
-//                    .load(url)
-//                    .into(imageView, object : com.squareup.picasso.Callback {
-//                        override fun onSuccess() { }
-//
-//                        override fun onError(e: Exception?) {
-//                            Log.d(tag, "error")
-//                        }
-//                    })
-//                Log.d("mymsg", url + " 2")
+                    activity.runOnUiThread {
+                        imageView.setImageBitmap(bmp)
+                    }
+                }
             })
 
             thread.start()
-//            if(item.brickCode != "") {
-//                Picasso.get()
-//                    .load(GlobalVariables.legoImgUrl + item.brickCode)
-//                    .into(imageView, object : com.squareup.picasso.Callback {
-//                        override fun onSuccess() { }
-//
-//                        override fun onError(e: Exception?) {
-//                            Picasso.get()
-//                                .load(GlobalVariables.bricklinkImgUrl + item.colorId + "/" + item.itemId + ".jpg")
-//                                .into(imageView, object : com.squareup.picasso.Callback {
-//                                    override fun onSuccess() { }
-//
-//                                    override fun onError(e: Exception?) {
-//                                        Picasso.get()
-//                                            .load(GlobalVariables.defaultLegoImg)
-//                                            .into(imageView, object : com.squareup.picasso.Callback {
-//                                                override fun onSuccess() { }
-//
-//                                                override fun onError(e: Exception?) {
-//                                                    Log.d(tag, "error")
-//                                                }
-//                                            })
-//                                    }
-//                                })
-//                        }
-//                    })
-//            } else {
-//                Picasso.get()
-//                    .load(GlobalVariables.bricklinkImgOldUrl + item.itemId + ".jpg")
-//                    .into(imageView, object : com.squareup.picasso.Callback {
-//                        override fun onSuccess() { }
-//
-//                        override fun onError(e: Exception?) {
-//                            Picasso.get()
-//                                .load(GlobalVariables.defaultLegoImg)
-//                                .into(imageView, object : com.squareup.picasso.Callback {
-//                                    override fun onSuccess() { }
-//
-//                                    override fun onError(e: Exception?) {
-//                                        Log.d(tag, "error")
-//                                    }
-//                                })
-//                        }
-//                    })
-//            }
 
             itemView.setOnClickListener {
                 if (adapterPosition != RecyclerView.NO_POSITION) callback.onItemClicked(items[adapterPosition])
@@ -221,20 +128,3 @@ class MainAdapter(var items: MutableList<InventoryPart>, val activity: Activity,
     }
 
 }
-
-//class MyFirstAdapter : RecyclerView.Adapter<MyFirstAdapter.ViewHolder>() {
-//    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-//        val view = LayoutInflater.from(parent.context).inflate(R.layout.main_item, parent, false)
-//        return ViewHolder(view)
-//    }
-//
-//    override fun getItemCount() = 30
-//
-//    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-//
-//    }
-//
-//    class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-//
-//    }
-//}

@@ -1,6 +1,5 @@
 package com.ubi.bricklist.utilities
 
-import com.ubi.bricklist.classes.DBHandler
 import com.ubi.bricklist.classes.inventory.Inventory
 
 object GlobalVariables {

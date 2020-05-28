@@ -50,7 +50,6 @@ class InventoryPart {
         extra: String,
         displayableName: String,
         id: String
-//        image: String
     ) {
         this.typeId = typeId
         this.itemId = itemId
@@ -61,7 +60,6 @@ class InventoryPart {
         this.inventoryId = inventoryId
         this.displayableName = displayableName
         this.id = id
-//        this.image = image
     }
 
     fun addImage(url: String) {
