@@ -1,9 +1,9 @@
 package com.ubi.bricklist.classes.inventory
 
+import android.annotation.SuppressLint
 import com.ubi.bricklist.utilities.GlobalVariables
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 class Inventory {
     var id: String = ""
@@ -18,9 +18,7 @@ class Inventory {
     var lastAccesed: String = ""
         get() = field
 
-//    var inventoryParts: MutableList<InventoryPart> = ArrayList()
-//        get() = field
-
+    @SuppressLint("SimpleDateFormat")
     constructor(name: String) {
         this.name = name
 
@@ -39,9 +37,4 @@ class Inventory {
         this.active = active
         this.lastAccesed = lastAccessed
     }
-
-//    fun addInventoryPart(part: InventoryPart) {
-//        this.inventoryParts.add(part)
-//    }
-
 }

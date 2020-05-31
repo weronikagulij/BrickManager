@@ -4,33 +4,18 @@ import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.ubi.bricklist.utilities.URLTaskManager
 import com.ubi.bricklist.classes.inventory.InventoryPart
 import com.ubi.bricklist.utilities.GlobalVariables
 import kotlinx.android.synthetic.main.activity_project.*
-import android.graphics.BitmapFactory
 import android.net.Uri
-import android.util.Log
 import android.widget.Toast
-import androidx.core.content.FileProvider
-import com.ubi.bricklist.classes.inventory.MainAdapter
+import com.ubi.bricklist.classes.Adapters.MainAdapter
 import java.io.File
 import java.lang.Exception
-import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
 import android.os.StrictMode
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
 
 
 class ProjectActivity : AppCompatActivity() {
@@ -52,11 +37,14 @@ class ProjectActivity : AppCompatActivity() {
 
         val inventoriesParts = GlobalVariables.dbHandler.getInventoriesPartsById(GlobalVariables.currentInventory.id)
 
-        val myAdapter = MainAdapter(inventoriesParts, this, object : MainAdapter.Callback {
-            override fun onItemClicked(item: InventoryPart) {
-                //TODO Here comes element, that was clicked on. You can continue to work with it.
-            }
-        })
+        val myAdapter = MainAdapter(
+            inventoriesParts,
+            this,
+            object : MainAdapter.Callback {
+                override fun onItemClicked(item: InventoryPart) {
+                    //TODO Here comes element, that was clicked on. You can continue to work with it.
+                }
+            })
 
         list_recycler_view.adapter = myAdapter
     }

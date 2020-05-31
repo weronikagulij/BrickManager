@@ -17,8 +17,6 @@ class InventoryPart {
         get() = field
     var extra: String = ""
         get() = field
-    var image: String = ""
-        get() = field
     var displayableName: String = ""
         get() = field
     var brickCode: String = ""
@@ -60,10 +58,6 @@ class InventoryPart {
         this.inventoryId = inventoryId
         this.displayableName = displayableName
         this.id = id
-    }
-
-    fun addImage(url: String) {
-        this.image = url
     }
 
     fun addBrickCode(code: String) {

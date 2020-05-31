@@ -29,18 +29,4 @@ class URLTaskManager {
 
         return exists
     }
-
-    fun checkIfPageExistsNonBlocking(urlString: String): Boolean {
-        var exists = false
-        val u = URL(urlString)
-        val huc = u.openConnection() as HttpURLConnection
-        huc.requestMethod = "GET"
-        huc.connect()
-        val code = huc.responseCode
-        if(code == 200 || code == 201 || code == 202) {
-            exists = true
-        }
-
-        return exists
-    }
 }

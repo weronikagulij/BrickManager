@@ -3,12 +3,9 @@ package com.ubi.bricklist.utilities
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
-import android.util.Log
 import com.ubi.bricklist.classes.inventory.Inventory
 import com.ubi.bricklist.classes.inventory.InventoryPart
 import java.io.File
-import java.net.HttpURLConnection
-import java.net.URL
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.collections.ArrayList

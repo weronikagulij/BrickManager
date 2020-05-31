@@ -140,20 +140,6 @@ class DBHandler {
                 inventoryPart.addBrickCode(codeCursor.getString(0))
             }
 
-//            if(codeCursor.moveToFirst()) {
-//                val code = codeCursor.getString(0)
-//                if(urlTaskManager.checkIfPageExsists(GlobalVariables.legoImgUrl + code)) {
-//                    url = GlobalVariables.legoImgUrl + code
-//                } else if(urlTaskManager.checkIfPageExsists(GlobalVariables.bricklinkImgUrl + colorId + "/" + code + ".jpg")) {
-//                    url = GlobalVariables.bricklinkImgUrl + colorId + "/" + code
-//                }
-//            } else if(urlTaskManager.checkIfPageExsists(GlobalVariables.bricklinkImgOldUrl + id + ".jpg")) {
-//                url = GlobalVariables.bricklinkImgOldUrl + id + ".jpg"
-//            }
-//
-//            Log.d("mymsg", url)
-//
-//            inventoryPart.addImage(url)
             inventoriesParts.add(inventoryPart)
             codeCursor.close()
         }

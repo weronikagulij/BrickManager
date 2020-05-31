@@ -1,13 +1,11 @@
 package com.ubi.bricklist.classes.XMLparser
 
 import android.app.Activity
-import android.util.Log
 import android.widget.TextView
 import com.ubi.bricklist.classes.inventory.Inventory
 import com.ubi.bricklist.classes.inventory.InventoryPart
 import com.ubi.bricklist.utilities.GlobalVariables
 import com.ubi.bricklist.utilities.UserSettings
-import kotlinx.android.synthetic.main.activity_add_project.*
 import java.net.HttpURLConnection
 import java.net.URL
 
