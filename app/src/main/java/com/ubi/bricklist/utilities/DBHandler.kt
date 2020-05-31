@@ -9,6 +9,8 @@ import com.ubi.bricklist.classes.inventory.InventoryPart
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.collections.ArrayList
 
 class DBHandler {
@@ -68,18 +70,23 @@ class DBHandler {
 
         while (cursor.moveToNext()) {
             val active = cursor.getString(2).toBoolean()
-            if(active) {
+            if(active || UserSettings.showingActive) {
                 val inventory =
                     Inventory(
                         cursor.getString(0),
                         cursor.getString(1),
-                        cursor.getString(2).toBoolean(),
+                        active,
                         cursor.getString(3)
                     )
                 inventories.add(inventory)
             }
         }
         cursor.close()
+
+        val formatter = DateTimeFormatter.ofPattern(GlobalVariables.dateFromat)
+
+        inventories = inventories.sortedWith(compareBy { LocalDateTime.parse(it.lastAccesed, formatter) }).toMutableList()
+        inventories = inventories.reversed().toMutableList()
 
         return inventories
     }
@@ -127,9 +134,6 @@ class DBHandler {
                     cursor.getString(9)
                 )
 
-            var url = GlobalVariables.defaultLegoImg
-            val urlTaskManager = URLTaskManager()
-
             val codeCursor = db.rawQuery("select codes.code \n" +
                     "from parts join codes on parts.id = codes.ItemID\n" +
                     "where parts.code=\"${id}\" and codes.ColorID=\"${colorId}\"", null)
@@ -138,20 +142,6 @@ class DBHandler {
                 inventoryPart.addBrickCode(codeCursor.getString(0))
             }
 
-//            if(codeCursor.moveToFirst()) {
-//                val code = codeCursor.getString(0)
-//                if(urlTaskManager.checkIfPageExsists(GlobalVariables.legoImgUrl + code)) {
-//                    url = GlobalVariables.legoImgUrl + code
-//                } else if(urlTaskManager.checkIfPageExsists(GlobalVariables.bricklinkImgUrl + colorId + "/" + code + ".jpg")) {
-//                    url = GlobalVariables.bricklinkImgUrl + colorId + "/" + code
-//                }
-//            } else if(urlTaskManager.checkIfPageExsists(GlobalVariables.bricklinkImgOldUrl + id + ".jpg")) {
-//                url = GlobalVariables.bricklinkImgOldUrl + id + ".jpg"
-//            }
-//
-//            Log.d("mymsg", url)
-//
-//            inventoryPart.addImage(url)
             inventoriesParts.add(inventoryPart)
             codeCursor.close()
         }
@@ -160,30 +150,21 @@ class DBHandler {
         return inventoriesParts
     }
 
-    fun getImageByUrl(url: URL) {
-        val thread = Thread(Runnable {
-            try {
-                with(url.openConnection() as HttpURLConnection) {
-                    requestMethod = "GET"
-                    inputStream.bufferedReader().use {
-                        it.lines().forEach { line ->
-                            Log.d("mymsg", line)
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-
-            }
-        })
-
-        thread.start()
+    fun updateActivity(inventoryId: String, value: String) {
+        val values = ContentValues()
+        values.put("Active", value)
+        db.update("Inventories", values, "id="+inventoryId, null)
     }
 
     fun updateQuantityInSet(itemId: String, currentQuantityInSet: String) {
         val values = ContentValues()
         values.put("QuantityInSet", currentQuantityInSet)
         db.update("InventoriesParts", values, "id="+itemId, null)
+    }
+
+    fun updateLastAccessed(inventoryId: String, value: String) {
+        val values = ContentValues()
+        values.put("LastAccessed", value)
+        db.update("Inventories", values, "id="+inventoryId, null)
     }
 }

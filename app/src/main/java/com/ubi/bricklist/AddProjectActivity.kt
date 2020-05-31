@@ -21,12 +21,13 @@ class AddProjectActivity : AppCompatActivity() {
     private val tag = "mymsg"
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        title = "Add a project"
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_project)
     }
 
     fun addProject(v: View) {
-        Log.d(tag, nameInput.text.toString())
         val xmlParser = XMLparser(this, addMessage, nameInput.text.toString(), xmlInput.text.toString())
         xmlParser.getProjectListFromUrl()
     }

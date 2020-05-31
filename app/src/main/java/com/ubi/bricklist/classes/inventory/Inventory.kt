@@ -1,5 +1,6 @@
 package com.ubi.bricklist.classes.inventory
 
+import com.ubi.bricklist.utilities.GlobalVariables
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -23,7 +24,7 @@ class Inventory {
     constructor(name: String) {
         this.name = name
 
-        val dateFormat = SimpleDateFormat("dd-MM-yyyy hh:mm")
+        val dateFormat = SimpleDateFormat(GlobalVariables.dateFromat)
         this.lastAccesed = dateFormat.format(Date())
     }
 

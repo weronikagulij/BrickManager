@@ -6,6 +6,7 @@ import android.widget.TextView
 import com.ubi.bricklist.classes.inventory.Inventory
 import com.ubi.bricklist.classes.inventory.InventoryPart
 import com.ubi.bricklist.utilities.GlobalVariables
+import com.ubi.bricklist.utilities.UserSettings
 import kotlinx.android.synthetic.main.activity_add_project.*
 import java.net.HttpURLConnection
 import java.net.URL
@@ -24,13 +25,11 @@ class XMLparser(
     private val loadingMsg = "Loading..."
 
     fun getProjectListFromUrl() {
-        val url = URL(GlobalVariables.xmlUrl + projectName + ".xml")
+        val url = URL(UserSettings.xmlUrl + projectName + ".xml")
 
         activity.runOnUiThread {
             fieldToUpdate.text = loadingMsg
         }
-
-        Log.d("mymsg",GlobalVariables.xmlUrl + projectName + ".xml")
 
         val thread = Thread(Runnable {
             try {
@@ -64,7 +63,7 @@ class XMLparser(
                                     .replace("</COLOR>", "")
                                     .replace(" ", "")
                             } else if ("<EXTRA>" in line) {
-                                projectXML.itemType = line
+                                projectXML.extra = line
                                     .replace("<EXTRA>", "")
                                     .replace("</EXTRA>", "")
                                     .replace(" ", "")

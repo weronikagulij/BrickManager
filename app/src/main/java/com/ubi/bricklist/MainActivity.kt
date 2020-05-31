@@ -19,6 +19,10 @@ import androidx.core.app.ComponentActivity.ExtraData
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.android.synthetic.main.main_item.*
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
@@ -26,11 +30,15 @@ class MainActivity : AppCompatActivity() {
     val REQUEST_CODE = 10000
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        title = "BrickList"
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
         GlobalVariables.dbHandler.connect(this)
+
+
 
         this.getProjectsFromDb()
     }
@@ -41,13 +49,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
+        when (item.itemId) {
+            R.id.action_settings -> {
+                val intent = Intent(this, SettingsActivity::class.java)
+                startActivityForResult(intent, REQUEST_CODE)
+
+                return true
+            }
+            else -> return super.onOptionsItemSelected(item)
         }
     }
 
-    // odśwież widok i zapisz do pliku
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if((requestCode==REQUEST_CODE)
             && (resultCode == Activity.RESULT_OK)) {
@@ -78,7 +90,7 @@ class MainActivity : AppCompatActivity() {
         inventoryList.setOnItemClickListener { _, _, arg2, _ ->
             GlobalVariables.currentInventory = inventories[arg2]
             val intent = Intent(this, ProjectActivity::class.java)
-            startActivity(intent)
+            startActivityForResult(intent, REQUEST_CODE)
         }
     }
 }

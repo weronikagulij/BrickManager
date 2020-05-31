@@ -1,6 +1,7 @@
 package com.ubi.bricklist
 
 import android.app.Activity
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,17 +16,39 @@ import com.ubi.bricklist.classes.inventory.InventoryPart
 import com.ubi.bricklist.utilities.GlobalVariables
 import kotlinx.android.synthetic.main.activity_project.*
 import android.graphics.BitmapFactory
+import android.net.Uri
+import android.util.Log
+import android.widget.Toast
+import androidx.core.content.FileProvider
+import com.ubi.bricklist.classes.inventory.MainAdapter
+import java.io.File
 import java.lang.Exception
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.*
+import android.os.StrictMode
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
 
 class ProjectActivity : AppCompatActivity() {
 
     private val tag = "mymsg"
     override fun onCreate(savedInstanceState: Bundle?) {
+        title = "BrickList"
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_project)
 
         projectName.setText(GlobalVariables.currentInventory.name)
+
+        if(GlobalVariables.currentInventory.active) {
+            toggleActivityButton.text = "Archive"
+        } else {
+            toggleActivityButton.text = "Restore"
+        }
 
         val inventoriesParts = GlobalVariables.dbHandler.getInventoriesPartsById(GlobalVariables.currentInventory.id)
 
@@ -37,94 +60,111 @@ class ProjectActivity : AppCompatActivity() {
 
         list_recycler_view.adapter = myAdapter
     }
-}
 
-class MainAdapter(var items: MutableList<InventoryPart>, val activity: Activity, val callback: Callback) : RecyclerView.Adapter<MainAdapter.MainHolder>() {
+    fun toggleActivity(v: View) {
+        if(GlobalVariables.currentInventory.active) {
+            GlobalVariables.currentInventory.active = false
+            GlobalVariables.dbHandler.updateActivity(GlobalVariables.currentInventory.id, "false")
+            toggleActivityButton.text = "Restore"
+        } else {
+            GlobalVariables.currentInventory.active = true
+            GlobalVariables.dbHandler.updateActivity(GlobalVariables.currentInventory.id, "true")
+            toggleActivityButton.text = "Archive"
+        }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
-            = MainHolder(LayoutInflater.from(parent.context).inflate(R.layout.main_item, parent, false))
+        val dateFormat = SimpleDateFormat(GlobalVariables.dateFromat)
+        val newDate = dateFormat.format(Date())
 
-    override fun getItemCount() = items.size
-
-    override fun onBindViewHolder(holder: MainHolder, position: Int) {
-        holder.bind(items[position], activity)
+        GlobalVariables.dbHandler.updateLastAccessed(GlobalVariables.currentInventory.id, newDate)
     }
 
-    inner class MainHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    override fun finish() {
+        val data = Intent()
+        setResult(Activity.RESULT_OK, data)
 
-        private val name = itemView.findViewById<TextView>(R.id.itemName)
-        private val currentNumber = itemView.findViewById<TextView>(R.id.currentNumber)
-        private val requiredNumber = itemView.findViewById<TextView>(R.id.requiredNumber)
+        super.finish()
+    }
 
-        private val addButton = itemView.findViewById<FloatingActionButton>(R.id.addButton)
-        private val subtractButton = itemView.findViewById<FloatingActionButton>(R.id.subtractButton)
+    fun sendWithEmail(v: View) {
+        val inventoriesPart =
+            GlobalVariables.dbHandler.getInventoriesPartsById(
+                GlobalVariables.currentInventory.id
+            )
 
-        private val imageView = itemView.findViewById<ImageView>(R.id.imageView)
+        var line: String
 
-        private val tag = "mymsg"
+        val file = File(getExternalFilesDir(null), "result.xml")
 
-        fun bind(item: InventoryPart, activity: Activity) {
-            name.text = item.displayableName
-            currentNumber.text = item.quantityInSet.toString()
-            requiredNumber.text = item.quantityInStore.toString()
+        file.printWriter().use { out ->
 
-            var url = GlobalVariables.defaultLegoImg
-            val urlTaskManager = URLTaskManager()
+            line = "<INVENTORY>"
+            out.println(line)
 
-            val thread = Thread(Runnable {
-                if(item.brickCode != "") {
-                    if(urlTaskManager.checkIfPageExsists(GlobalVariables.legoImgUrl + item.brickCode)) {
-                        url = GlobalVariables.legoImgUrl + item.brickCode
-                    } else if(urlTaskManager.checkIfPageExsists(GlobalVariables.bricklinkImgUrl + item.colorId + "/" + item.itemId+ ".jpg")) {
-                        url = GlobalVariables.bricklinkImgUrl + item.colorId + "/" + item.brickCode
+            for (part in inventoriesPart) {
+                if(part.quantityInStore > part.quantityInSet) {
+                    line = "  <ITEM>"
+                    out.println(line)
+
+                    line =
+                        "    <INVENTORY>${GlobalVariables.currentInventory.name}</INVENTORY>"
+                    out.println(line)
+
+                    line =
+                        "    <MISSING_QTY>${part.quantityInStore - part.quantityInSet}</MISSING_QTY>"
+                    out.println(line)
+
+                    line =
+                        "    <ITEM_ID>${part.itemId}</ITEM_ID>"
+                    out.println(line)
+
+                    if (part.brickCode.isNotEmpty()) {
+                        line =
+                            "    <CODE>${part.brickCode}</CODE>"
+                        out.println(line)
                     }
-                } else if(urlTaskManager.checkIfPageExsists(GlobalVariables.bricklinkImgOldUrl + item.itemId + ".jpg")) {
-                    url = GlobalVariables.bricklinkImgOldUrl + item.itemId + ".jpg"
+
+                    line =
+                        "    <NAME>${part.displayableName}</NAME>"
+                    out.println(line)
+
+                    line =
+                        "    <COLOR_ID>${part.colorId}</COLOR_ID>"
+                    out.println(line)
+
+                    line =
+                        "    <EXTRA>${part.extra}</EXTRA>"
+                    out.println(line)
+
+                    line =
+                        "  </ITEM>"
+                    out.println(line)
                 }
-
-                try {
-                    val urlHttp = URL(url)
-                    val bmp = BitmapFactory.decodeStream(urlHttp.openConnection().getInputStream())
-
-                    activity.runOnUiThread {
-                        imageView.setImageBitmap(bmp)
-                    }
-                } catch (e: Exception) {
-                    val urlHttp = URL(GlobalVariables.defaultLegoImg)
-                    val bmp = BitmapFactory.decodeStream(urlHttp.openConnection().getInputStream())
-
-                    activity.runOnUiThread {
-                        imageView.setImageBitmap(bmp)
-                    }
-                }
-            })
-
-            thread.start()
-
-            itemView.setOnClickListener {
-                if (adapterPosition != RecyclerView.NO_POSITION) callback.onItemClicked(items[adapterPosition])
             }
 
-            addButton.setOnClickListener {
-                if(currentNumber.text.toString().toInt() < requiredNumber.text.toString().toInt()) {
-                    val newCurr = currentNumber.text.toString().toInt() + 1
-                    currentNumber.text = newCurr.toString()
-                    GlobalVariables.dbHandler.updateQuantityInSet(item.id, newCurr.toString())
-                }
-            }
+            line = "</INVENTORY>"
+            out.println(line)
+        }
 
-            subtractButton.setOnClickListener {
-                if(currentNumber.text.toString().toInt() > 0) {
-                    val newCurr = currentNumber.text.toString().toInt() - 1
-                    currentNumber.text = newCurr.toString()
-                    GlobalVariables.dbHandler.updateQuantityInSet(item.id, newCurr.toString())
-                }
-            }
+        val mIntent = Intent(Intent.ACTION_SEND)
+        val subject = "BrickList missing bricks"
+
+        mIntent.data = Uri.parse("mailto:")
+        mIntent.type = "text/plain"
+
+        mIntent.putExtra(Intent.EXTRA_SUBJECT, subject)
+
+        val builder = StrictMode.VmPolicy.Builder()
+        StrictMode.setVmPolicy(builder.build())
+
+        val uri = Uri.fromFile(file)
+        mIntent.putExtra(Intent.EXTRA_STREAM, uri)
+
+        try {
+            startActivity(Intent.createChooser(mIntent, "Choose Email Client..."))
+        }
+        catch (e: Exception){
+            Toast.makeText(this, e.message, Toast.LENGTH_LONG).show()
         }
     }
-
-    interface Callback {
-        fun onItemClicked(item: InventoryPart)
-    }
-
 }
+
